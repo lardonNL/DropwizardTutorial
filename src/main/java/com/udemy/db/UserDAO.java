@@ -23,8 +23,8 @@ public class UserDAO extends AbstractDAO<User> {
     }
 
     @UnitOfWork
-    public User persistUser(User user){
-        return this.persist(user);
+    public User persist(User user){
+        return super.persist(user);
     }
 
     @UnitOfWork

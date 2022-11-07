@@ -61,6 +61,7 @@ public class AuthIntegrationTest {
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
     }
 
+
     @Test
     @DisplayName("(╯°□°)╯︵ ┻━┻")
     public void flipTable(){    }
@@ -70,15 +71,15 @@ public class AuthIntegrationTest {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class HTTPSEnabled{
 
-//        @BeforeEach
-//        public void setUp () {
-//            User user = new User("username", "password", "AuthIntegrationTest@test.test");
-//            try {
-//                database.inTransaction(() -> userDAO.persistUser(user));
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
+        @BeforeEach
+        public void setUp () {
+            User user = new User("username", "password", "AuthIntegrationTest@test.test");
+            try {
+                database.inTransaction(() -> userDAO.save(user));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         @Test
         @DisplayName("testValidCallToSecuredWorld")
