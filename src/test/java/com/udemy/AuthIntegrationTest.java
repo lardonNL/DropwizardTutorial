@@ -2,8 +2,6 @@ package com.udemy;
 
 import com.udemy.core.User;
 import com.udemy.db.UserDAO;
-import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.testing.ResourceHelpers;
 import io.dropwizard.testing.junit5.DAOTestExtension;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
@@ -12,8 +10,6 @@ import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
@@ -23,7 +19,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class AuthIntegrationTest {
@@ -71,14 +66,25 @@ public class AuthIntegrationTest {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class HTTPSEnabled{
 
+//        @BeforeEach
+//        public void setUp () {
+//            User user = new User("username", "password", "AuthIntegrationTest@test.test");
+//            try {
+//                database.inTransaction(() -> userDAO.save(user));
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+
         @BeforeEach
         public void setUp () {
-            User user = new User("username", "password", "AuthIntegrationTest@test.test");
-            try {
-                database.inTransaction(() -> userDAO.save(user));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            Client client = EXT.client();
+
+            Response response = client
+                    .target(TARGET)
+                    .path("hello/standard")
+                    .request()
+                    .get();
         }
 
         @Test

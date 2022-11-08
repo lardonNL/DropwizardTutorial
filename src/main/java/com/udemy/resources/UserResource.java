@@ -24,6 +24,15 @@ public class UserResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
+    @Path("/standard")
+    @UnitOfWork
+    public String pushStandard() throws Exception {
+        userDAO.save(new User("username", "password", "test@test.test"));
+        return "pushed standard data";
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
     @UnitOfWork
     public String getGreeting(){
         return "Hello world!";
