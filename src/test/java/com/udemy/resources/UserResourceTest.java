@@ -1,5 +1,6 @@
 package com.udemy.resources;
 
+import com.udemy.auth.DBAuthenticator;
 import com.udemy.auth.HelloAuthenticator;
 import com.udemy.core.User;
 import com.udemy.db.UserDAO;
@@ -13,17 +14,20 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.Mockito.*;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Base64;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class UserResourceTest {
@@ -33,7 +37,7 @@ public class UserResourceTest {
     private static String password = "password";
 
     private static final HttpAuthenticationFeature FEATURE
-            = HttpAuthenticationFeature.basic("u", password);
+            = HttpAuthenticationFeature.basic("username", password);
 
     private static final Authenticator<BasicCredentials, User> AUTHENTICATOR
             = new Authenticator<BasicCredentials, User>() {
@@ -49,7 +53,7 @@ public class UserResourceTest {
             .addProvider(
                     new AuthDynamicFeature(
                             new BasicCredentialAuthFilter.Builder<User>()
-                                    .setAuthenticator(new HelloAuthenticator(password))
+                                    .setAuthenticator(new DBAuthenticator(userDAO))
                                     .setRealm("Secret stuff")
                                     .buildAuthFilter()
                     )
@@ -63,28 +67,36 @@ public class UserResourceTest {
             .addResource(new UserResource(userDAO))
             .build();
 
+    private static String base64UsernameAndPassword() { // "dXNlcm5hbWU6cGFzc3dvcmQ="
+        return Base64.getEncoder().encodeToString("username:password".getBytes());
+    }
+
     @BeforeAll
     public static void setUpClass(){
         RULE.getJerseyTest().client().register(FEATURE);
+        when(userDAO.findByUsernamePassword(anyString(), anyString())).thenReturn(Optional.of(new User("", "", "")));
     }
 
     @Test
     public void getGreeting() {
         String expected = "Hello world!";
-        String actual = RULE.target("/hello").request(MediaType.TEXT_PLAIN).get(String.class);
-        Assertions.assertEquals(expected, actual);
+
+        String actual = RULE
+                .target("/users")
+                .request(MediaType.TEXT_PLAIN)
+                .get(String.class);
+
+        assertEquals(expected, actual);
     }
 
     @Test
     public void testGetSecuredGreeting(){
-        String credential = "Basic " + Base64.getEncoder().encodeToString(("username:" + password).getBytes());
-
         Response response = RULE
-                .target("/hello/secured")
+                .target("/users/secured")
                 .request()
-                .header(HttpHeaders.AUTHORIZATION, credential)
+                .header(HttpHeaders.AUTHORIZATION, "Basic " + base64UsernameAndPassword())
                 .get();
 
-        Assertions.assertEquals("Hello secured world!", response.readEntity(String.class));
+        assertEquals("Hello secured world!", response.readEntity(String.class));
     }
 }

@@ -13,7 +13,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Optional;
 
-@Path("/hello")
+@Path("/users")
+@Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
 
     private UserDAO userDAO;
@@ -22,9 +23,9 @@ public class UserResource {
         this.userDAO = userDAO;
     }
 
-    @GET
+    @POST
     @Produces(MediaType.TEXT_PLAIN)
-    @Path("/standard")
+    @Path("/add")
     @UnitOfWork
     public String pushStandard() throws Exception {
         userDAO.save(new User("username", "password", "test@test.test"));
@@ -48,7 +49,6 @@ public class UserResource {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/model")
     @UnitOfWork
     public ModelGetTest modelGetTest(){
@@ -57,7 +57,6 @@ public class UserResource {
 
     @PUT
     @Path("/saveUser")
-    @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
     public User saveUser(@NotNull @Valid User userToSave, @Auth User user) throws Exception {
         System.out.println(userToSave.getName());
@@ -78,7 +77,6 @@ public class UserResource {
 
     @GET
     @Path("/getUserByID/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
     public User getUserByID(@PathParam("id") int id, @Auth User user){
         return userDAO.getByID(id);
@@ -86,7 +84,6 @@ public class UserResource {
 
     @DELETE
     @Path("/deleteUserByName/{name}")
-    @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
     public String deleteUserByName(@PathParam("name") String username, @Auth User user){
         Optional<User> userToDelete = userDAO.findByUsername(username);

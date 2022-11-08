@@ -50,7 +50,6 @@ public class DropBookmarksUpdatedApplication extends Application<DropBookmarksUp
                 new AuthDynamicFeature(
                         new BasicCredentialAuthFilter.Builder<User>()
                                 .setAuthenticator(dbAuth)
-                                .setRealm("Secret stuff")
                                 .buildAuthFilter()
                 )
         );
